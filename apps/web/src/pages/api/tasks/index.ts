@@ -29,7 +29,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 export default handler;
 
 const fetchTasks = async (req: NextApiRequest, res: NextApiResponse) => {
-  const supabase = createPagesServerClient<Database>({
+  const supabase = createPagesServerClient({
     req,
     res,
   });
@@ -83,8 +83,7 @@ const fetchTasks = async (req: NextApiRequest, res: NextApiResponse) => {
     const queryBuilder = supabase
       .from('tasks')
       .select(
-        'id, name, description, priority, completed, start_date, end_date, list_id, ' +
-          'task_lists!inner(board_id)'
+        'id, name, description, priority, completed, start_date, end_date, list_id, task_lists!inner(board_id)'
       )
       .eq('task_lists.board_id', boardId)
       .order('created_at', { ascending: false });
