@@ -23,100 +23,119 @@ import { SortableContext, arrayMove } from '@dnd-kit/sortable';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
-const defaultCols = [
-  {
-    id: 'backlog' as const,
-    title: 'Backlog',
-  },
-  {
-    id: 'todo' as const,
-    title: 'Todo',
-  },
-  {
-    id: 'in-progress' as const,
-    title: 'In progress',
-  },
-  {
-    id: 'reviewing' as const,
-    title: 'Reviewing',
-  },
-  {
-    id: 'done' as const,
-    title: 'Done',
-  },
-] satisfies Column[];
 
+// const defaultCols = [
+//   {
+//     id: 'backlog' as const,
+//     title: 'Backlog',
+//   },
+//   {
+//     id: 'todo' as const,
+//     title: 'Todo',
+//   },
+//   {
+//     id: 'in-progress' as const,
+//     title: 'In progress',
+//   },
+//   {
+//     id: 'reviewing' as const,
+//     title: 'Reviewing',
+//   },
+//   {
+//     id: 'done' as const,
+//     title: 'Done',
+//   },
+// ] satisfies Column[];
+interface KanbanBoardProps {
+  defaultCols: defaultCols[];
+  initialTasks: Task[];
+}
+
+interface defaultCols {
+  id: string;
+  board_id: string;
+  title: string;
+  position: number;
+  created_at: string;
+}
+
+// interface Task {
+//   id: string;
+//   columnId: string;
+//   content: string;
+//   created_at: string;
+// }
 export type ColumnId = (typeof defaultCols)[number]['id'];
 
-const initialTasks: Task[] = [
-  {
-    id: 'task1',
-    columnId: 'done',
-    content: 'Project initiation and planning',
-  },
-  {
-    id: 'task2',
-    columnId: 'done',
-    content: 'Gather requirements from stakeholders',
-  },
-  {
-    id: 'task3',
-    columnId: 'done',
-    content: 'Create wireframes and mockups',
-  },
-  {
-    id: 'task4',
-    columnId: 'in-progress',
-    content: 'Develop homepage layout',
-  },
-  {
-    id: 'task5',
-    columnId: 'reviewing',
-    content: 'Design color scheme and typography',
-  },
-  {
-    id: 'task6',
-    columnId: 'todo',
-    content: 'Implement user authentication',
-  },
-  {
-    id: 'task7',
-    columnId: 'backlog',
-    content: 'Build contact us page',
-  },
-  {
-    id: 'task8',
-    columnId: 'backlog',
-    content: 'Create product catalog',
-  },
-  {
-    id: 'task9',
-    columnId: 'backlog',
-    content: 'Develop about us page',
-  },
-  {
-    id: 'task10',
-    columnId: 'backlog',
-    content: 'Optimize website for mobile devices',
-  },
-  {
-    id: 'task11',
-    columnId: 'todo',
-    content: 'Integrate payment gateway',
-  },
-  {
-    id: 'task12',
-    columnId: 'todo',
-    content: 'Perform testing and bug fixing',
-  },
-  {
-    id: 'task13',
-    columnId: 'todo',
-    content: 'Launch website and deploy to server',
-  },
-];
+// const initialTasks: Task[] = [
+//   {
+//     id: 'task1',
+//     columnId: 'done',
+//     content: 'Project initiation and planning',
+//   },
+//   {
+//     id: 'task2',
+//     columnId: 'done',
+//     content: 'Gather requirements from stakeholders',
+//   },
+//   {
+//     id: 'task3',
+//     columnId: 'done',
+//     content: 'Create wireframes and mockups',
+//   },
+//   {
+//     id: 'task4',
+//     columnId: 'in-progress',
+//     content: 'Develop homepage layout',
+//   },
+//   {
+//     id: 'task5',
+//     columnId: 'reviewing',
+//     content: 'Design color scheme and typography',
+//   },
+//   {
+//     id: 'task6',
+//     columnId: 'todo',
+//     content: 'Implement user authentication',
+//   },
+//   {
+//     id: 'task7',
+//     columnId: 'backlog',
+//     content: 'Build contact us page',
+//   },
+//   {
+//     id: 'task8',
+//     columnId: 'backlog',
+//     content: 'Create product catalog',
+//   },
+//   {
+//     id: 'task9',
+//     columnId: 'backlog',
+//     content: 'Develop about us page',
+//   },
+//   {
+//     id: 'task10',
+//     columnId: 'backlog',
+//     content: 'Optimize website for mobile devices',
+//   },
+//   {
+//     id: 'task11',
+//     columnId: 'todo',
+//     content: 'Integrate payment gateway',
+//   },
+//   {
+//     id: 'task12',
+//     columnId: 'todo',
+//     content: 'Perform testing and bug fixing',
+//   },
+//   {
+//     id: 'task13',
+//     columnId: 'todo',
+//     content: 'Launch website and deploy to server',
+//   },
+// ];
 
-export function KanbanBoard() {
+export function KanbanBoard({defaultCols, initialTasks} : KanbanBoardProps ) {
   const [columns, setColumns] = useState<Column[]>(defaultCols);
   const pickedUpTaskColumn = useRef<ColumnId | null>(null);
   const columnsId = useMemo(() => columns.map((col) => col.id), [columns]);
