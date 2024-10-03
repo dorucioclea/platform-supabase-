@@ -2792,6 +2792,7 @@ export type Database = {
           content: string | null;
           created_at: string;
           id: string;
+          position: number | null;
           updated_at: string | null;
         };
         Insert: {
@@ -2799,6 +2800,7 @@ export type Database = {
           content?: string | null;
           created_at?: string;
           id?: string;
+          position?: number | null;
           updated_at?: string | null;
         };
         Update: {
@@ -2806,6 +2808,7 @@ export type Database = {
           content?: string | null;
           created_at?: string;
           id?: string;
+          position?: number | null;
           updated_at?: string | null;
         };
         Relationships: [
@@ -2865,21 +2868,21 @@ export type Database = {
       };
       workspace_boards_columns: {
         Row: {
-          board_id: string | null;
+          boardId: string | null;
           created_at: string;
           id: string;
           potition: number | null;
           title: string | null;
         };
         Insert: {
-          board_id?: string | null;
+          boardId?: string | null;
           created_at?: string;
           id?: string;
           potition?: number | null;
           title?: string | null;
         };
         Update: {
-          board_id?: string | null;
+          boardId?: string | null;
           created_at?: string;
           id?: string;
           potition?: number | null;
@@ -2887,8 +2890,8 @@ export type Database = {
         };
         Relationships: [
           {
-            foreignKeyName: 'workspace_boards_columns_board_id_fkey';
-            columns: ['board_id'];
+            foreignKeyName: 'workspace_boards_columns_boardId_fkey';
+            columns: ['boardId'];
             isOneToOne: false;
             referencedRelation: 'workspace_boards';
             referencedColumns: ['id'];

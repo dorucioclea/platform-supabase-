@@ -11,7 +11,10 @@ import { useMemo } from 'react';
 
 export interface Column {
   id: UniqueIdentifier;
+  board_id: string;
   title: string;
+  position: number;
+  created_at: string;
 }
 
 export type ColumnType = 'Column';

@@ -2,20 +2,6 @@ import { KanbanBoard } from './kanban';
 import { createClient } from '@/utils/supabase/server';
 
 // Use your defined interface for columns and tasks
-interface Column {
-  id: string;
-  board_id: string;
-  title: string;
-  position: number;
-  created_at: string;
-}
-
-interface Task {
-  id: string;
-  columnId: string;
-  content: string;
-  created_at: string;
-}
 
 interface Props {
   params: {
@@ -49,26 +35,21 @@ async function getData(boardId: string) {
     .select('*')
     .eq('boardId', boardId);
 
-  // Check for errors and return early if columns fetching fails
   if (columnError) {
     console.error('Error fetching columns:', columnError);
     return { columns: [], tasks: [] };
   }
-// console.log(columns[0].id,'anh iu e')
-  // If columns are empty, return early
+
   if (!columns || columns.length === 0) {
     console.warn('No columns found for this board');
     return { columns: [], tasks: [] };
   }
 
-  // Debug: Log the fetched columns' IDs
-
-
   // Fetch all tasks for the given columns using their column IDs
   const { data: tasks, error: taskError } = await supabase
     .from('workspace_board_tasks')
-    .select('*')
- 
+    .select('*');
+
   if (taskError) {
     console.error('Error fetching tasks:', taskError);
     return { columns, tasks: [] };
@@ -76,6 +57,14 @@ async function getData(boardId: string) {
 
 
 
+  const processedTasks = tasks.map((task, index) => ({
+    id: task.id ?? '',  // Ensure task ID is set
+    columnId: task.columnId ?? '',  // Ensure columnId is set
+    content: task.content ?? 'No Content', 
+    position: task.position != null ? task.position : index + 1, 
+    created_at: task.created_at ?? '',  
+    updated_at: task.updated_at ?? '',  
+  }));
 
-  return { columns, tasks };
+  return { columns, tasks: processedTasks };
 }

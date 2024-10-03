@@ -46,26 +46,29 @@ import { createPortal } from 'react-dom';
 //   },
 // ] satisfies Column[];
 interface KanbanBoardProps {
-  wsId: string;
+  wsId?: string;
   defaultCols: defaultCols[];
   initialTasks: Task[];
 }
 
 interface defaultCols {
+  id?: UniqueIdentifier ;
+  board_id?: string | null;
+  title?: string | null;
+  position?: number | null;
+  created_at?: string | null;
+}
+
+
+interface DefaultColumn {
   id: string;
   board_id: string;
   title: string;
   position: number;
   created_at: string;
 }
+  export type ColumnId = DefaultColumn['id'];
 
-// interface Task {
-//   id: string;
-//   columnId: string;
-//   content: string;
-//   created_at: string;
-// }
-export type ColumnId = (typeof defaultCols)[number]['id'];
 
 // const initialTasks: Task[] = [
 //   {
@@ -140,7 +143,17 @@ export function KanbanBoard({
   defaultCols,
   initialTasks,
 }: KanbanBoardProps) {
-  const [columns, setColumns] = useState<Column[]>(defaultCols);
+  const processedColumns = defaultCols.map(col => ({
+    id: col.id ?? '',  
+    board_id: col.board_id ?? '',  
+    title: col.title ?? 'Untitled',  
+    position: col.position ?? 0,  
+    created_at: col.created_at ?? '' 
+  }));
+
+
+
+  const [columns] = useState<Column[]>(processedColumns);
   const pickedUpTaskColumn = useRef<ColumnId | null>(null);
   const columnsId = useMemo(() => columns.map((col) => col.id), [columns]);
 
@@ -299,7 +312,10 @@ export function KanbanBoard({
             <BoardColumn
               key={col.id}
               column={col}
-              tasks={tasks.filter((task) => task.columnId === col.id)}
+              // Sort tasks based on position
+              tasks={tasks
+                .filter((task) => task.columnId === col.id)
+                .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))} // Sort by position
             />
           ))}
         </SortableContext>
@@ -322,7 +338,7 @@ export function KanbanBoard({
     }
   }
   async function updateTaskPositionOnServer(
-    taskId: string,
+    taskId: UniqueIdentifier,
     columnId: string,
     position: number
   ) {

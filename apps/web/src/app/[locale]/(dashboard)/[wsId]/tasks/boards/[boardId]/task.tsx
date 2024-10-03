@@ -9,11 +9,14 @@ import { cva } from 'class-variance-authority';
 import { GripVertical } from 'lucide-react';
 
 export interface Task {
-  id: UniqueIdentifier;
-  columnId: ColumnId;
-  potition: Number;
+  id: string;
+  columnId: string;
   content: string;
+  position: number | null;  // Make position nullable if it's optional in the DB
+  created_at: string;
+  updated_at: string | null;
 }
+
 
 interface TaskCardProps {
   task: Task;
