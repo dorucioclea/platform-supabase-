@@ -23,7 +23,6 @@ import { SortableContext, arrayMove } from '@dnd-kit/sortable';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
-
 // const defaultCols = [
 //   {
 //     id: 'backlog' as const,
@@ -47,6 +46,7 @@ import { createPortal } from 'react-dom';
 //   },
 // ] satisfies Column[];
 interface KanbanBoardProps {
+  wsId: string;
   defaultCols: defaultCols[];
   initialTasks: Task[];
 }
@@ -135,7 +135,11 @@ export type ColumnId = (typeof defaultCols)[number]['id'];
 //   },
 // ];
 
-export function KanbanBoard({defaultCols, initialTasks} : KanbanBoardProps ) {
+export function KanbanBoard({
+  wsId,
+  defaultCols,
+  initialTasks,
+}: KanbanBoardProps) {
   const [columns, setColumns] = useState<Column[]>(defaultCols);
   const pickedUpTaskColumn = useRef<ColumnId | null>(null);
   const columnsId = useMemo(() => columns.map((col) => col.id), [columns]);
@@ -317,6 +321,38 @@ export function KanbanBoard({defaultCols, initialTasks} : KanbanBoardProps ) {
       return;
     }
   }
+  async function updateTaskPositionOnServer(
+    taskId: string,
+    columnId: string,
+    position: number
+  ) {
+    try {
+      const response = await fetch(
+        `/api/v1/workspaces/${wsId}/task-boards/column/${taskId}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            tasks: {
+              columnId, // New column ID if task was moved to another column
+              position, // Updated position within the column
+            },
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Error updating task:', errorData);
+      } else {
+        console.log('Task position updated successfully on the server.');
+      }
+    } catch (error) {
+      console.error('Error updating task:', error);
+    }
+  }
 
   function onDragEnd(event: DragEndEvent) {
     setActiveColumn(null);
@@ -332,17 +368,37 @@ export function KanbanBoard({defaultCols, initialTasks} : KanbanBoardProps ) {
 
     const activeData = active.data.current;
 
-    if (activeId === overId) return;
+    if (activeId === overId) return; // No change if dropped on the same task
 
-    const isActiveAColumn = activeData?.type === 'Column';
-    if (!isActiveAColumn) return;
+    const isActiveATask = activeData?.type === 'Task';
 
-    setColumns((columns) => {
-      const activeColumnIndex = columns.findIndex((col) => col.id === activeId);
+    if (!isActiveATask) return;
 
-      const overColumnIndex = columns.findIndex((col) => col.id === overId);
+    // Find the new position based on drop target
+    const newPosition = tasks.findIndex((task) => task.id === overId);
 
-      return arrayMove(columns, activeColumnIndex, overColumnIndex);
+    // Update the task's position in the state
+    setTasks((tasks) => {
+      const activeIndex = tasks.findIndex((t) => t.id === activeId);
+
+      // Move the task to the new position in the same or different column
+      const updatedTasks = arrayMove(tasks, activeIndex, newPosition);
+
+      // Reassign positions to each task (e.g., 1, 2, 3, etc.)
+      const tasksWithUpdatedPositions = updatedTasks.map((task, index) => ({
+        ...task,
+        position: index + 1, // Update task's position
+      }));
+      console.log(tasksWithUpdatedPositions, 'taks position');
+      // Send updated positions to the server
+      tasksWithUpdatedPositions.forEach((task) => {
+        console.log('update tasks');
+
+        // Ensure we're updating the task with the new columnId and position
+        updateTaskPositionOnServer(task.id, task.columnId, task.position);
+      });
+
+      return tasksWithUpdatedPositions;
     });
   }
 

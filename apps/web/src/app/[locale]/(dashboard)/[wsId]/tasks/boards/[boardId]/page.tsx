@@ -24,7 +24,7 @@ interface Props {
   };
 }
 
-export default async function WorkspaceBoardEditor({ params: { boardId } }: Props) {
+export default async function WorkspaceBoardEditor({ params: {wsId ,boardId } }: Props) {
   if (!boardId) {
     return <p>No boardId provided</p>;
   }
@@ -33,11 +33,11 @@ export default async function WorkspaceBoardEditor({ params: { boardId } }: Prop
   const { columns, tasks } = await getData(boardId);
 
   // Debug: Log fetched columns and tasks
-  console.log('Fetched columns:', columns);
-  console.log('Fetched tasks:', tasks);
+  // console.log('Fetched columns:', columns);
+  // console.log('Fetched tasks:', tasks);
 
   // Render the Kanban board with the fetched columns and tasks
-  return <KanbanBoard defaultCols={columns} initialTasks={tasks} />;
+  return <KanbanBoard wsId= {wsId} defaultCols={columns} initialTasks={tasks} />;
 }
 
 async function getData(boardId: string) {

@@ -11,6 +11,7 @@ import { GripVertical } from 'lucide-react';
 export interface Task {
   id: UniqueIdentifier;
   columnId: ColumnId;
+  potition: Number;
   content: string;
 }
 
